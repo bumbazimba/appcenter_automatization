@@ -1,14 +1,15 @@
 ### AppCenter automated builds with report ###
 
-**Technologies and Tools:** | Powershell | AppCenter | API 
+**Technologies and Tools:** | Powershell 7 | AppCenter | API 
 ---|---|---|---
 
 This Powershell script allows user to build all branches for a selected Application in [App Center] and get report in Excel format. Script based on App Center [API] requests.
 ### Pre-requirments: ###
 
-1 Registered account in AppCenter  
-2 Existing Application with configured branches. If branch is not configured, user may get error  
-3 User API token  
+1 Powershell 6 or above installed  
+2 Registered account in AppCenter  
+3 Existing Application with configured branches. If branch is not configured, user may get error  
+4 User API token  
 
 ### Execution details ###
 
