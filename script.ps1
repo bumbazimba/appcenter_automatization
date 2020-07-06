@@ -1,7 +1,14 @@
-﻿#Enter AppCenter credentials for API requests
+﻿#This script builds several branches for an Application in AppCenter and saves a report.
+#Check Readme.md file for more details - https://github.com/bumbazimba/appcenter_automatization/blob/master/README.md
+#Author Nikita Nikolaev
+#Version 1.0
+
+#Enter AppCenter credentials for API requests
 	$user = Read-Host "Enter AppCenter username"
 	$app = Read-Host "Enter Application name"
 	$token = Read-Host "Enter API Token"
+	[int]$branches_number = Read-Host "Enter number of branches to build"
+    $branches_number = $branches_number-1
 
 #Create Excel file and insert table headers
 	$excel = New-Object -ComObject excel.application
@@ -11,7 +18,7 @@
 	$sheet.Name = 'Report'
 	$sheet.Cells.Item(1,1)= 'Branch name'
 	$sheet.Cells.Item(1,2)= 'Build status'
-	$sheet.Cells.Item(1,3)= 'Duration'
+	$sheet.Cells.Item(1,3)= 'Duration (min)'
 	$sheet.Cells.Item(1,4)= 'Link to build logs'
 	$row = 2
 
@@ -22,12 +29,12 @@
 	$branches.branch.name
 	$branches = $branches.branch.name
 
-#Build First 4 branches and save IDs for next step
+#Build First $branches_number branches and save IDs for next step
 	$build_id = @()
 
-	Foreach ($branch in $branches[0..3])	
+	Foreach ($branch in $branches[0..$branches_number])	
 		{ 		
-			$build_id += Invoke-RestMethod -Uri "https://api.appcenter.ms/v0.1/apps/$user/$app/branches/$build/builds" -Method Post `
+			$build_id += Invoke-RestMethod -Uri "https://api.appcenter.ms/v0.1/apps/$user/$app/branches/$branch/builds" -Method Post `
 				-Headers @{"Accept"="application/json"; "X-API-Token"="$($token)"; "Content-Type"="application/json"} | Select-object id
 			Write-host "Branch $branch - build started"
 			$sheet.Cells.Item($row,1)=$branch
@@ -47,6 +54,7 @@
 					$details = Invoke-RestMethod -Uri "https://api.appcenter.ms/v0.1/apps/$user/$app/builds/$id" -Method Get `
 						-Headers @{"Accept"="application/json"; "X-API-Token"="$($token)"; "Content-Type"="application/json"};
 					$result = $details.result
+                    Write-Host "Build ID $id is in progress"
 					Start-Sleep -s 30
 				}
 				#Calculating Duration time
@@ -63,11 +71,11 @@
 					$row++
 					$number++
 					$result = "in progress"
-					Write-Host "Build with ID $id finished!"
+					Write-Host "Build ID $id completed!"
 		}
 
 #Resize Excel columns and save report on Desktop
-	Write-Host "`n All builds finished, please check status in the Report" -ForegroundColor Green
+	Write-Host "`nAll builds finished, please check status in the Report" -ForegroundColor Green
 	Write-Host "`nReport was saved on your Desktop in Excel file!" 
 	$date = Get-Date -Format "MM/dd/yyyy_HH_mm_ss"
 	$output_path = "C:\Users\$env:username\Desktop\Report_$date.xlsx"
