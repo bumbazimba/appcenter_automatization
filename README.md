@@ -1,4 +1,4 @@
-### AppCenter automated builds with report ###
+## AppCenter automated builds with a report ##
 
 **Technologies and Tools:** | Powershell 7 | AppCenter | API 
 ---|---|---|---
