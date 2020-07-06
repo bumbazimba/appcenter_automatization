@@ -1,5 +1,6 @@
 ﻿#This script builds several branches for an Application in AppCenter and saves a report.
 #Check Readme.md file for more details - https://github.com/bumbazimba/appcenter_automatization/blob/master/README.md
+#Designed for Powershell 6 or above. Tested on Powershell 7
 #Author Nikita Nikolaev
 #Version 1.0
 
@@ -24,7 +25,7 @@
 
 #Get All branches from the Application and save branches names in array
 	$branches = Invoke-RestMethod -Uri "https://api.appcenter.ms/v0.1/apps/$user/$app/branches" -Method Get `
-		-Headers @{"Accept"="application/json"; "X-API-Token"="$($token)"; "Content-Type"="application/json"};
+		-Headers @{"Accept"="application/json"; "X-API-Token"="$($token)"; "Content-Type"="application/json"} -MaximumRetryCount 5 -RetryIntervalSec 2;
 	Write-Host "`nList of all branches in Application $app :"
 	$branches.branch.name
 	$branches = $branches.branch.name
@@ -35,7 +36,7 @@
 	Foreach ($branch in $branches[0..$branches_number])	
 		{ 		
 			$build_id += Invoke-RestMethod -Uri "https://api.appcenter.ms/v0.1/apps/$user/$app/branches/$branch/builds" -Method Post `
-				-Headers @{"Accept"="application/json"; "X-API-Token"="$($token)"; "Content-Type"="application/json"} | Select-object id
+				-Headers @{"Accept"="application/json"; "X-API-Token"="$($token)"; "Content-Type"="application/json"} -MaximumRetryCount 5 -RetryIntervalSec 2 | Select-object id
 			Write-host "Branch $branch - build started"
 			$sheet.Cells.Item($row,1)=$branch
 			$row++
@@ -52,7 +53,7 @@
 				while (($result -ne "failed") -and ($result -ne "success"))
 				{
 					$details = Invoke-RestMethod -Uri "https://api.appcenter.ms/v0.1/apps/$user/$app/builds/$id" -Method Get `
-						-Headers @{"Accept"="application/json"; "X-API-Token"="$($token)"; "Content-Type"="application/json"};
+						-Headers @{"Accept"="application/json"; "X-API-Token"="$($token)"; "Content-Type"="application/json"} -MaximumRetryCount 5 -RetryIntervalSec 2;
 					$result = $details.result
                     Write-Host "Build ID $id is in progress"
 					Start-Sleep -s 30
